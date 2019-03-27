@@ -2,6 +2,7 @@
 package tetris;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
@@ -33,7 +34,7 @@ public class Tetris extends JPanel{
 
             @Override
             public void keyTyped(KeyEvent MyK) {
-  //              throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //              throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             }
 
             @Override
@@ -47,7 +48,7 @@ public class Tetris extends JPanel{
                     
                 case KeyEvent.VK_DOWN:
                     game.dropDown();
-                    break;
+                      break;
                     
                 case KeyEvent.VK_LEFT:
                     game.move(-1);
@@ -56,8 +57,7 @@ public class Tetris extends JPanel{
                 case KeyEvent.VK_RIGHT:
                     game.move(+1);
                     break;
-                    
-            }
+               }
             }
 
             @Override
@@ -123,9 +123,10 @@ public class Tetris extends JPanel{
  
    private final Color[] myColor={Color.CYAN,Color.magenta,Color.orange,Color.blue,Color.black,Color.pink,Color.red};
    private Point pt;
-   private int currentPiece;
+   private int jetaNiyeKhelsi;
    private int rotation;
-   private ArrayList<Integer> nextPieces=new ArrayList<Integer>();
+   private String gameover="";
+   private final ArrayList<Integer> nextPieces=new ArrayList<>();
    private int score,gameLevel;
    private Color[][] rong;
    
@@ -143,66 +144,72 @@ public class Tetris extends JPanel{
                }
            }
        }
-   newPiece();
+   jetaAshbe();
    }
    
-   public void newPiece(){ //notun notun pice ashbe
+   public void jetaAshbe(){ //notun notun pice ashbe
+       
        pt=new Point(5,2);
        rotation=0;
        if(nextPieces.isEmpty()){
          Collections.addAll(nextPieces,0,1,2,3);
          Collections.shuffle(nextPieces);
        }
-       currentPiece=nextPieces.get(0);
+       jetaNiyeKhelsi=nextPieces.get(0);
        nextPieces.remove(0);
-   
-  }
+       }
    
    
    private boolean collidesAt(int x,int y,int rotation){
-       for(Point p: myPoint[currentPiece][rotation]){
+       for(Point p: myPoint[jetaNiyeKhelsi][rotation]){
        if(rong[p.x+x][p.y+y]!=Color.black){
        return true;
+        }
        }
-       }
-   return false;
+       return false;
    }
       public void rotate(int i){ //pice gula ghurai
           int newRotation=(rotation+i)%4;
           if(newRotation<0){
               newRotation=3;
+       gameover="Game over!";
           }
           if(!collidesAt(pt.x, pt.y, newRotation)){
           rotation=newRotation;
-          }
+          gameover="";
+}
           repaint();
       }   
       
       public void move(int i){  //daane baame move korai
           if(!collidesAt(pt.x+i, pt.y, rotation)){
               pt.x+=i;
-          
+              gameover="";
           }
+          else {
+                  gameover="Sorry! No Move";
+                  }
+          
           repaint();
-      }
+       }
       public void dropDown(){ //niche move
+          
           if(!collidesAt(pt.x, pt.y+1, rotation)){
-              pt.y+=1;
-              
+              pt.y+=1;   
+              gameover="";
           }
           else{
-              fixToWell();
+             fixToWell();
           }
           repaint();
       }
          
- public void fixToWell(){
-     for(Point p: myPoint[currentPiece][rotation]){
-         rong[pt.x+p.x][pt.y+p.y]=myColor[currentPiece];
+ public void fixToWell(){                    //niche namte thakbe
+     for(Point p: myPoint[jetaNiyeKhelsi][rotation]){
+         rong[pt.x+p.x][pt.y+p.y]=myColor[jetaNiyeKhelsi];
      }
      clearRows();
-     newPiece();
-     
+     jetaAshbe();
  }
  
  public void deleteRow(int row){
@@ -270,13 +277,14 @@ public class Tetris extends JPanel{
 
 
   
-    private void drawPiece(Graphics g) { 
- g.setColor(myColor[currentPiece]);
- for (Point p : myPoint[currentPiece][rotation]) {
+private void drawPiece(Graphics g) { 
+ g.setColor(myColor[jetaNiyeKhelsi]);
+ for (Point p : myPoint[jetaNiyeKhelsi][rotation]) {
  g.fillRect((p.x + pt.x) * 26,
     (p.y + pt.y) * 26,
     25, 25);
  }
+ 
  }
         @Override
       public void paintComponent(Graphics art){
@@ -285,6 +293,7 @@ public class Tetris extends JPanel{
            for(int j=0;j<23;j++){
                art.setColor(rong[i][j]);
                art.fillRect(26*i, 26*j, 25, 25);
+               
            }
        }
        
@@ -302,6 +311,7 @@ public class Tetris extends JPanel{
        art.drawString("=============", 27*12, 155);
        art.setColor(Color.GREEN);
        art.drawString("Apnar Score:"+score,27*12,170);
+       
        art.setColor(Color.DARK_GRAY);
        art.drawString("=============", 27*12, 180);
        art.setColor(Color.orange);
@@ -318,8 +328,12 @@ public class Tetris extends JPanel{
        art.drawString("Press  ^  for Rotate", 27*12, 340);
        art.drawString("Press down for fast", 27*12, 360);
        art.drawString("Down adds point!", 27*12, 380);
-           
+       
+       art.setColor(Color.RED);
+       art.drawString(""+gameover,12*10,30);
+  
        drawPiece(art);
+       
    }
 
 }
